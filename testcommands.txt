@@ -1,0 +1,7 @@
+# send a post with a basic message
+curl -X POST -H "Content-Type: application/json" -d '{"name":"abel","email":"abel@example.com","message":"sample text"}' http://127.0.0.1:3000/contact
+
+curl -X POST -H "Content-Type: application/json" \
+-d '{"name":"abel","email":"abel@example.com","message":"sample text"}' \
+https://ehwa269urj.execute-api.eu-west-1.amazonaws.com/dev/contact/
+

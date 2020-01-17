@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample SAM Template for app1
+
+# Parameters:
+#   DomainName:
+#     Description: The site domain name only i.e example.com
+#     Type: String
+#     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<![.-])
+#     ConstraintDescription: Must be a valid domain name.
+#   CertificateArn:
+#     Description: The ARN of the SSL certificate for the domain
+#     Type: String
+
+Parameters:
+  ContactEmail:
+    Description: Email Address to send information to.
+    Type: String
+
+Globals:
+  Api:
+    OpenApiVersion: 3.0.1
+  Function:
+    Timeout: 60
+
+Resources:
+  ContactSns:
+    Type: "AWS::SNS::Topic"
+    Properties: 
+      DisplayName: !Sub ${AWS::StackName} - Contact Form
+      Subscription:
+        - Endpoint: !Ref ContactEmail
+          Protocol: email
+
+  ContactFormFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: .aws-sam/build/ContactFormFunction/
+      Handler: ContactForm::ContactForm.ContactFormFunction::PostFunctionHandlerAsync
+      Runtime: dotnetcore2.1
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt ContactSns.TopicName
+      Environment:
+        Variables:
+          CONTACT_SNS_TOPIC: !Ref ContactSns
+      Events:
+        PostEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /contact
+            Method: POST
+
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors:
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+
+Outputs:
+  ContactFormApiEndpoint:
+    Description: "API Gateway endpoint URL for stage for Contact Form function"
+    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${RestApi.Stage}/contact/"
+
