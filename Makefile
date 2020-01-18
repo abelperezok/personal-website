@@ -3,9 +3,9 @@
 REGION = eu-west-1
 PACKAGED_TEMPLATE = packaged.yaml
 S3_BUCKET = abelperez-temp
-STACK_NAME = web-abelperez-info
+STACK_NAME = www-abelperezmartinez-com
 TEMPLATE = template.yaml
-S3_BUCKET_WEB = web-abelperez-info-staticsitebucket-8rfwjvlq7z80
+S3_BUCKET_WEB = www-abelperezmartinez-com-staticsitebucket-fzebgrl9qqrs
 
 SRC = src
 PROJECT_NAME = ContactForm
@@ -15,10 +15,11 @@ BUILD_OUTPUT_PATH = $(BASE_OUTPUT_PATH)/$(FUNCTION_FOLDER)
 BUILD_OUTPUT_ZIP = $(BUILD_OUTPUT_PATH)/$(PROJECT_NAME).zip
 
 ContactEmail = abelperezok@gmail.com
-DomainName = abelperez.info
-SubDomainName = web
-CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/1bfd9f67-8a7e-4aa6-b07e-06cea2308acf
-
+DomainName = abelperezmartinez.com
+SubDomainName = www
+CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/dbde4cf9-5eaa-485c-b070-e230572f78e6
+IncludeRedirectToSubDomain = true
+LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M
 
 .PHONY: clean
 clean:
