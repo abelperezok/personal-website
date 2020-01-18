@@ -3,20 +3,36 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   Sample SAM Template for app1
 
-# Parameters:
-#   DomainName:
-#     Description: The site domain name only i.e example.com
-#     Type: String
-#     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<![.-])
-#     ConstraintDescription: Must be a valid domain name.
-#   CertificateArn:
-#     Description: The ARN of the SSL certificate for the domain
-#     Type: String
-
 Parameters:
   ContactEmail:
     Description: Email Address to send information to.
     Type: String
+  HostedZone:
+    Description: Leave as default value as per AWS documents.
+    Type: String
+    Default: Z2FDTNDATAQYW2
+  CertificateArn:
+    Description: The Arn of SSL certificate which must be created / imported in N. Virginia (US-EAST-1) region
+    Type: String
+  DomainName:
+    Description: The site domain name only i.e example.com
+    Type: String
+    AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<![.-])
+    ConstraintDescription: Must be a valid domain name.
+  SubDomainName:
+    Description: The site subdomain name only i.e www
+    Type: String
+    AllowedPattern: (?!-)[a-zA-Z0-9-]{1,15}(?<![.-])
+    ConstraintDescription: Must be a valid subdomain name.
+  IncludeRedirectToSubDomain:
+    Description: Whether it should include a redirection from the naked domain to the subdomain.
+    Type: String
+    Default: false
+    AllowedValues: [true, false]
+  LambdaEdgeRedirectFunction:
+    Description: The Arn of Lambda@Edge function, it must be in N. Virginia (US-EAST-1) region
+    Type: String
+    Default: ""
 
 Globals:
   Api:
@@ -24,7 +40,11 @@ Globals:
   Function:
     Timeout: 60
 
+Conditions:
+  includeRedirect: !Equals [!Ref IncludeRedirectToSubDomain, "true"]
+
 Resources:
+  # SNS topic to send emails
   ContactSns:
     Type: "AWS::SNS::Topic"
     Properties: 
@@ -33,6 +53,7 @@ Resources:
         - Endpoint: !Ref ContactEmail
           Protocol: email
 
+  # Contact Form Lambda Function
   ContactFormFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -53,6 +74,7 @@ Resources:
             Path: /contact
             Method: POST
 
+  # REST API
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -61,9 +83,124 @@ Resources:
         AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
 
+  # Custom domain 
+  CustomDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties: 
+      CertificateArn: !Ref CertificateArn
+      DomainName: !Sub api.${DomainName}
+      SecurityPolicy: TLS_1_2
+
+  ApiRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub api.${DomainName}.
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt CustomDomain.DistributionHostedZoneId
+        DNSName: !GetAtt CustomDomain.DistributionDomainName
+      HostedZoneName: !Sub ${DomainName}.
+
+  BaseMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties: 
+      BasePath: v1
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref RestApi
+      Stage: !Ref RestApi.Stage
+
+
+
+
+  # S3 bucket
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # CloudFront distribution
+  WWWCloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !If [includeRedirect, !Sub "${DomainName}", !Ref "AWS::NoValue"]
+          - !Sub ${SubDomainName}.${DomainName}
+        DefaultRootObject: index.html
+        CacheBehaviors: []
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          TargetOriginId: S3Bucket
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+            Headers: []
+          DefaultTTL: 0
+          MinTTL: 0
+          MaxTTL: 31536000
+          SmoothStreaming: false
+          ViewerProtocolPolicy: redirect-to-https
+          LambdaFunctionAssociations:
+            - !If
+                - includeRedirect
+                - EventType: viewer-request
+                  LambdaFunctionARN: !Ref LambdaEdgeRedirectFunction
+                - !Ref "AWS::NoValue"
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+          - DomainName: !Select [2, !Split ["/", !GetAtt StaticSiteBucket.WebsiteURL]]
+            Id: S3Bucket
+            CustomOriginConfig:
+              HTTPPort: 80
+              OriginProtocolPolicy: http-only
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          SslSupportMethod: sni-only
+          AcmCertificateArn: !Ref CertificateArn
+          MinimumProtocolVersion: TLSv1.1_2016
+
+  # Route53 A record
+  WWWRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        HostedZoneId: !Ref HostedZone
+        DNSName: !GetAtt WWWCloudFront.DomainName
+      HostedZoneName: !Sub ${DomainName}.
+      Name: !Sub ${SubDomainName}.${DomainName}.
+      Type: A
+  MainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Condition: includeRedirect # conditionally created
+    Properties:
+      AliasTarget:
+        HostedZoneId: !Ref HostedZone
+        DNSName: !GetAtt WWWCloudFront.DomainName
+      HostedZoneName: !Sub ${DomainName}.
+      Name: !Sub ${DomainName}.
+      Type: A
+
 
 Outputs:
   ContactFormApiEndpoint:
     Description: "API Gateway endpoint URL for stage for Contact Form function"
     Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${RestApi.Stage}/contact/"
+  S3StaticBucketName:
+    Description: S3 bucket to store website files full name
+    Value: !Ref StaticSiteBucket
+  S3StaticBucketArn:
+    Description: S3 bucket to store website files - Amazon ARN
+    Value: !GetAtt StaticSiteBucket.Arn
 

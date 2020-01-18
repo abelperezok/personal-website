@@ -5,3 +5,6 @@ curl -X POST -H "Content-Type: application/json" \
 -d '{"name":"abel","email":"abel@example.com","message":"sample text"}' \
 https://ehwa269urj.execute-api.eu-west-1.amazonaws.com/dev/contact/
 
+curl -X POST -H "Content-Type: application/json" \
+-d '{"name":"abel","email":"abel@example.com","message":"sample text"}' \
+https://api.abelperez.info/v1/contact/
