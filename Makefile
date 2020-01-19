@@ -19,7 +19,7 @@ DomainName = abelperezmartinez.com
 SubDomainName = www
 CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/dbde4cf9-5eaa-485c-b070-e230572f78e6
 IncludeRedirectToSubDomain = true
-LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M
+LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M:3
 
 .PHONY: clean
 clean:
@@ -40,7 +40,9 @@ deploy: package
 	sam deploy --template-file $(BASE_OUTPUT_PATH)/packaged.yaml --stack-name $(STACK_NAME) \
 	--s3-bucket $(S3_BUCKET) --s3-prefix $(STACK_NAME) \
 	--region $(REGION) --capabilities CAPABILITY_IAM \
-	--parameter-overrides ContactEmail=$(ContactEmail) DomainName=$(DomainName) SubDomainName=$(SubDomainName) CertificateArn=$(CertificateArn)
+	--parameter-overrides ContactEmail=$(ContactEmail) DomainName=$(DomainName) SubDomainName=$(SubDomainName) \
+	CertificateArn=$(CertificateArn) IncludeRedirectToSubDomain=$(IncludeRedirectToSubDomain) \
+	LambdaEdgeRedirectFunction=$(LambdaEdgeRedirectFunction)
 
 .PHONY: start-api
 start-api:
