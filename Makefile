@@ -40,6 +40,7 @@ deploy: package
 	sam deploy --template-file $(BASE_OUTPUT_PATH)/packaged.yaml --stack-name $(STACK_NAME) \
 	--s3-bucket $(S3_BUCKET) --s3-prefix $(STACK_NAME) \
 	--region $(REGION) --capabilities CAPABILITY_IAM \
+	--no-fail-on-empty-changeset \
 	--parameter-overrides ContactEmail=$(ContactEmail) DomainName=$(DomainName) SubDomainName=$(SubDomainName) \
 	CertificateArn=$(CertificateArn) IncludeRedirectToSubDomain=$(IncludeRedirectToSubDomain) \
 	LambdaEdgeRedirectFunction=$(LambdaEdgeRedirectFunction)
