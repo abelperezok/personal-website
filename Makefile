@@ -6,6 +6,7 @@ S3_BUCKET = abelperez-temp
 STACK_NAME = www-abelperezmartinez-com
 TEMPLATE = template.yaml
 S3_BUCKET_WEB = www-abelperezmartinez-com-staticsitebucket-fzebgrl9qqrs
+CF_ROLE = arn:aws:iam::976153948458:role/cf-fullaccess-role
 
 SRC = src
 PROJECT_NAME = ContactForm
@@ -41,6 +42,7 @@ deploy: package
 	--s3-bucket $(S3_BUCKET) --s3-prefix $(STACK_NAME) \
 	--region $(REGION) --capabilities CAPABILITY_IAM \
 	--no-fail-on-empty-changeset \
+	--role-arn $(CF_ROLE) \
 	--parameter-overrides ContactEmail=$(ContactEmail) DomainName=$(DomainName) SubDomainName=$(SubDomainName) \
 	CertificateArn=$(CertificateArn) IncludeRedirectToSubDomain=$(IncludeRedirectToSubDomain) \
 	LambdaEdgeRedirectFunction=$(LambdaEdgeRedirectFunction)
