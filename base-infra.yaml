@@ -109,7 +109,7 @@ Resources:
             };
             callback(null, response);
           };
-      Runtime: nodejs10.x
+      Runtime: nodejs14.x
 
   LambdaEdgeRedirectFunctionVersion2:
     Type: AWS::Lambda::Version
