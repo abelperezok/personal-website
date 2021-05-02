@@ -8,3 +8,27 @@ https://ehwa269urj.execute-api.eu-west-1.amazonaws.com/dev/contact/
 curl -X POST -H "Content-Type: application/json" \
 -d '{"name":"abel","email":"abel@example.com","message":"sample text"}' \
 https://api.abelperez.info/v1/contact/
+
+
+
+SSL_CERT_ARN=arn:aws:acm:us-east-1:976153948458:certificate/d774c7ad-86b1-4695-aff7-aaf8152b7ec0
+
+
+
+BASE_STACK_NAME=abelperezmartinez-base-v2
+DOMAIN_NAME=abelperezmartinez.com
+SUB_DOMAIN_NAME=www
+INCLUDE_REDIRECT=true
+SSL_CERT_ARN=
+HOSTED_ZONE_ID=ZNKSSIFWUTKP6
+
+aws cloudformation deploy --stack-name $BASE_STACK_NAME \
+--template-file base-infra.yaml \
+--capabilities CAPABILITY_IAM \
+--parameter-overrides \
+DomainName=$DOMAIN_NAME \
+SubDomainName=$SUB_DOMAIN_NAME \
+SSLCertificateArn=$SSL_CERT_ARN \
+IncludeRedirectToSubDomain=$INCLUDE_REDIRECT \
+HostedZoneId=$HOSTED_ZONE_ID \
+--region us-east-1

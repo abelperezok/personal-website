@@ -18,9 +18,9 @@ BUILD_OUTPUT_ZIP = $(BUILD_OUTPUT_PATH)/$(PROJECT_NAME).zip
 ContactEmail = abelperezok@gmail.com
 DomainName = abelperezmartinez.com
 SubDomainName = www
-CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/d774c7ad-86b1-4695-aff7-aaf8152b7ec0
+CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/2dd4c957-22dd-4ee6-b27a-7ab40283269b
 IncludeRedirectToSubDomain = true
-LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M:3
+LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M:4
 
 .PHONY: clean
 clean:
