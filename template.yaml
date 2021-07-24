@@ -59,7 +59,7 @@ Resources:
     Properties:
       CodeUri: .aws-sam/build/ContactFormFunction/
       Handler: ContactForm::ContactForm.ContactFormFunction::PostFunctionHandlerAsync
-      Runtime: dotnetcore2.1
+      Runtime: dotnetcore3.1
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ContactSns.TopicName
