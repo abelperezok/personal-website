@@ -20,7 +20,7 @@ DomainName = abelperezmartinez.com
 SubDomainName = www
 CertificateArn = arn:aws:acm:us-east-1:976153948458:certificate/2dd4c957-22dd-4ee6-b27a-7ab40283269b
 IncludeRedirectToSubDomain = true
-LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M:4
+LambdaEdgeRedirectFunction = arn:aws:lambda:us-east-1:976153948458:function:abelperezmartinez-base-v2-CloudFrontHttpCanonicalR-10GRJW7WOAW5M:5
 
 .PHONY: clean
 clean:
