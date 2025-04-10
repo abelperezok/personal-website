@@ -41,10 +41,13 @@ namespace ContactForm
         {
             var input = JsonSerializer.Deserialize<ContactFormMessage>(apigProxyEvent.Body);
             var topicArn = Environment.GetEnvironmentVariable("CONTACT_SNS_TOPIC");
-            
-            var msg = FormatMessage(input);
-            var publishResponse = await _snsClient.PublishAsync(topicArn, msg, "Contact form message");
 
+            if (!string.IsNullOrEmpty(input?.Email))
+            {
+                var msg = FormatMessage(input);
+                var publishResponse = await _snsClient.PublishAsync(topicArn, msg, "Contact form message");
+            }
+            
             return new APIGatewayProxyResponse
             {
                 Body = JsonSerializer.Serialize(new { success = true }),

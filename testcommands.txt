@@ -11,7 +11,7 @@ https://api.abelperez.info/v1/contact/
 
 
 
-SSL_CERT_ARN=arn:aws:acm:us-east-1:976153948458:certificate/d774c7ad-86b1-4695-aff7-aaf8152b7ec0
+SSL_CERT_ARN=arn:aws:acm:us-east-1:976153948458:certificate/2dd4c957-22dd-4ee6-b27a-7ab40283269b
 
 
 
